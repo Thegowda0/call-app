@@ -21,8 +21,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AudioRoutePlugin.class);
         super.onCreate(savedInstanceState);
 
-        // Create notification channels early
-        NotificationHelper.createChannels(this);
+        // Create notification channels early — Kotlin object accessed via INSTANCE
+        NotificationHelper.INSTANCE.createChannels(this);
 
         // Request notification permission on Android 13+
         requestNotificationPermission();
@@ -33,7 +33,7 @@ public class MainActivity extends BridgeActivity {
         // Handle if the app was launched from an incoming call notification
         Intent intent = getIntent();
         if (intent != null && intent.getBooleanExtra("incoming_call", false)) {
-            // The WebView will pick up the pending call via localStorage/session state
+            // WebView picks up pending call via localStorage/session state
         }
     }
 
@@ -53,7 +53,7 @@ public class MainActivity extends BridgeActivity {
     private void startCallService() {
         try {
             Intent svc = new Intent(this, CallService.class);
-            svc.setAction(CallService.ACTION_START);
+            svc.setAction(CallService.Companion.getACTION_START());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(svc);
             } else {
@@ -67,6 +67,6 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Silent handling — UI will reflect permission state
+        // Silent handling — UI reflects permission state
     }
 }

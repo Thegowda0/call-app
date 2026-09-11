@@ -19,12 +19,12 @@ object NotificationHelper {
     const val NOTIF_ONGOING_ID = 1001
     const val NOTIF_INCOMING_ID = 1002
 
+    @JvmStatic
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Ongoing service channel — silent
         val ongoing = NotificationChannel(
             CHANNEL_ONGOING,
             "Call System Service",
@@ -36,7 +36,6 @@ object NotificationHelper {
         }
         manager.createNotificationChannel(ongoing)
 
-        // Incoming call channel — high priority, sound + vibration
         val incoming = NotificationChannel(
             CHANNEL_INCOMING,
             "Incoming Calls",
@@ -56,6 +55,7 @@ object NotificationHelper {
         manager.createNotificationChannel(incoming)
     }
 
+    @JvmStatic
     fun showOngoingNotification(context: Context, text: String) {
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -77,11 +77,10 @@ object NotificationHelper {
 
         try {
             NotificationManagerCompat.from(context).notify(NOTIF_ONGOING_ID, notif)
-        } catch (e: SecurityException) {
-            // Permission not granted yet — ignore
-        }
+        } catch (e: SecurityException) {}
     }
 
+    @JvmStatic
     fun showIncomingCallNotification(context: Context, callerName: String) {
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -106,11 +105,10 @@ object NotificationHelper {
 
         try {
             NotificationManagerCompat.from(context).notify(NOTIF_INCOMING_ID, notif)
-        } catch (e: SecurityException) {
-            // Permission not granted — ignore
-        }
+        } catch (e: SecurityException) {}
     }
 
+    @JvmStatic
     fun cancelIncomingNotification(context: Context) {
         try {
             NotificationManagerCompat.from(context).cancel(NOTIF_INCOMING_ID)
