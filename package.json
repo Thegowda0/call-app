@@ -14,7 +14,8 @@
   "license": "ISC",
   "dependencies": {
     "@capacitor/android": "^8.5.1",
-    "@capacitor/core": "^8.5.1"
+    "@capacitor/core": "^8.5.1",
+    "@notnotsamuel/capacitor-plugin-audiotoggle": "^0.0.2"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.1"
