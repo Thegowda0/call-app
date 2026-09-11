@@ -9,21 +9,16 @@ import androidx.core.app.NotificationCompat
 
 class CallService : Service() {
 
-   companion object {
+  companion object {
     @Volatile
     var isRunning: Boolean = false
         private set
 
-    @JvmStatic
     const val ACTION_START = "com.mohan.callsystem.START"
-    @JvmStatic
     const val ACTION_STOP = "com.mohan.callsystem.STOP"
-    @JvmStatic
     const val ACTION_INCOMING = "com.mohan.callsystem.INCOMING"
-    @JvmStatic
     const val ACTION_INCOMING_END = "com.mohan.callsystem.INCOMING_END"
 
-    @JvmStatic
     const val EXTRA_CALLER_NAME = "caller_name"
 }
 
