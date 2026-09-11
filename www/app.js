@@ -494,7 +494,7 @@ async function acceptIncoming() {
   await currentCall.pc.setLocalDescription(offer);
   wsSend({ type: 'signal', signal: offer });
 
-  if (IS_MOBILE) setTimeout(setDefaultAudioRoute, 800);
+  // removed: setTimeout(setDefaultAudioRoute, 800);
 }
 
 function declineIncoming() {
@@ -625,14 +625,14 @@ async function setupReceiverPeerConnection() {
   const stream = await getLocalMedia();
   const pc = await createPeerConnection();
   stream.getTracks().forEach(t => pc.addTrack(t, stream));
-  if (IS_MOBILE) setTimeout(setDefaultAudioRoute, 800);
+  // removed: setTimeout(setDefaultAudioRoute, 800);
 }
 async function setupCallerPeerConnection() {
   if (!currentCall) return;
   const stream = await getLocalMedia();
   const pc = await createPeerConnection();
   stream.getTracks().forEach(t => pc.addTrack(t, stream));
-  if (IS_MOBILE) setTimeout(setDefaultAudioRoute, 800);
+  // removed: setTimeout(setDefaultAudioRoute, 800);
 }
 
 async function applyRemoteSignal(sig) {
@@ -810,6 +810,21 @@ async function toggleSpeaker() {
   const v = document.getElementById('remote-video');
   const willBeSpeaker = !btn.classList.contains('active');
 
+  // Native app path — use custom AudioRoute plugin
+  if (IS_NATIVE) {
+    try {
+      const { registerPlugin } = await import('@capacitor/core');
+      const AudioRoute = registerPlugin('AudioRoute');
+      await AudioRoute.setSpeaker({ on: willBeSpeaker });
+      btn.classList.toggle('active', willBeSpeaker);
+      showNetworkBanner(willBeSpeaker ? 'Speaker ON' : 'Earpiece');
+      return;
+    } catch (e) {
+      console.warn('Native audio toggle failed:', e);
+    }
+  }
+
+  // Web path
   if (!v.setSinkId) {
     btn.classList.toggle('active', willBeSpeaker);
     showNetworkBanner(willBeSpeaker ? 'Speaker ON' : 'Earpiece');
@@ -820,17 +835,17 @@ async function toggleSpeaker() {
     if (willBeSpeaker) {
       const devs = await navigator.mediaDevices.enumerateDevices();
       const sp = devs.filter(d => d.kind === 'audiooutput');
-      const speaker = sp.find(s => /speaker|loud/i.test(s.label)) || sp.find(s => s.deviceId !== 'default' && s.deviceId !== '');
+      const speaker = sp.find(s => /speaker|loud/i.test(s.label))
+        || sp.find(s => s.deviceId !== 'default' && s.deviceId !== '');
       if (speaker) {
         await v.setSinkId(speaker.deviceId);
         audioOutputDevice = speaker.deviceId;
-        btn.classList.add('active');
-        showNetworkBanner('Speaker ON');
       } else {
-        btn.classList.add('active');
-        audioOutputDevice = null;
-        showNetworkBanner('Speaker (best effort)');
+        await v.setSinkId('');
+        audioOutputDevice = '';
       }
+      btn.classList.add('active');
+      showNetworkBanner('Speaker ON');
     } else {
       await v.setSinkId('');
       audioOutputDevice = null;
