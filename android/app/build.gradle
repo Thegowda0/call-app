@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+
 android {
     namespace = "com.mohan.callsystem"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -35,7 +36,7 @@ android {
     kotlin {
         jvmToolchain(17)
     }
-}}
+}
 
 repositories {
     flatDir {
