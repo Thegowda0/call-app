@@ -1,0 +1,9 @@
+{
+  "appId": "com.mohan.callsystem",
+  "appName": "Call System",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "hostname": "call-system.mohan0.workers.dev"
+  }
+}

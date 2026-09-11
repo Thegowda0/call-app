@@ -1,0 +1,22 @@
+{
+  "name": "call-app",
+  "version": "1.0.0",
+  "description": "Call System native wrapper",
+  "scripts": {
+    "build": "echo 'Static files ready in root'"
+  },
+  "keywords": [
+    "webrtc",
+    "calls",
+    "capacitor"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.1"
+  }
+}
