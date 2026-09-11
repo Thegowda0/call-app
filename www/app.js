@@ -12,6 +12,39 @@ function apiFetch(path, options) {
   const url = path.startsWith('http') ? path : (API_BASE + path);
   return fetch(url, Object.assign({ credentials: 'include' }, options || {}));
 }
+// =========================================================
+// NATIVE BRIDGE — talks to the Android AudioRoute plugin
+// =========================================================
+let _AudioRouteNative = null;
+async function getNativeAudioRoute() {
+  if (!IS_NATIVE) return null;
+  if (_AudioRouteNative) return _AudioRouteNative;
+  try {
+    const { registerPlugin } = await import('@capacitor/core');
+    _AudioRouteNative = registerPlugin('AudioRoute');
+    return _AudioRouteNative;
+  } catch (e) {
+    console.warn('Native bridge unavailable:', e);
+    return null;
+  }
+}
+async function nativeNotifyIncoming(callerName) {
+  try { const A = await getNativeAudioRoute(); if (!A) return; await A.notifyIncoming({ callerName: callerName || 'Someone' }); }
+  catch (e) { console.warn('notifyIncoming failed:', e); }
+}
+async function nativeCancelIncoming() {
+  try { const A = await getNativeAudioRoute(); if (!A) return; await A.cancelIncoming(); }
+  catch (e) { console.warn('cancelIncoming failed:', e); }
+}
+async function nativeStartService() {
+  try { const A = await getNativeAudioRoute(); if (!A) return; await A.startService(); }
+  catch (e) { console.warn('startService failed:', e); }
+}
+async function nativeStopService() {
+  try { const A = await getNativeAudioRoute(); if (!A) return; await A.stopService(); }
+  catch (e) { console.warn('stopService failed:', e); }
+}
+// =========================================================
 const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -202,6 +235,7 @@ async function doLogout() { await apiFetch('/api/auth/logout', { method: 'POST' 
 async function afterLogin() {
   document.getElementById('top-username').textContent = me.username;
   if (me.is_admin) document.getElementById('card-admin').classList.remove('hidden');
+  if (IS_NATIVE) nativeStartService();
   try { const r = await apiFetch('/api/settings'); const d = await r.json(); settings = d.settings; } catch (e) {}
   getIceServers().catch(() => {});
   showScreen('screen-home');
@@ -456,9 +490,11 @@ function updateModeUI() {
 // =========================================================
 // INCOMING
 // =========================================================
+
 function handleIncomingCall(msg) {
   if (incomingCallData || currentCall) return;
   incomingCallData = msg;
+  if (IS_NATIVE) nativeNotifyIncoming(msg.username || 'Someone');
   document.getElementById('caller-name').textContent = msg.username || 'someone';
   showScreen('screen-home');
   document.getElementById('incoming-toast').classList.remove('hidden');
@@ -468,6 +504,9 @@ function handleIncomingCall(msg) {
 }
 
 async function acceptIncoming() {
+  stopSound('ringtone');
+  if (IS_NATIVE) nativeCancelIncoming();
+  if (!incomingCallData) return;
   stopSound('ringtone');
   if (!incomingCallData) return;
   document.getElementById('incoming-toast').classList.add('hidden');
@@ -499,6 +538,7 @@ async function acceptIncoming() {
 
 function declineIncoming() {
   stopSound('ringtone');
+  if (IS_NATIVE) nativeCancelIncoming();
   if (!incomingCallData) return;
   wsSend({ type: 'call-declined' });
   incomingCallData = null;
@@ -1058,8 +1098,9 @@ function hideNetworkBanner() { const b = document.getElementById('network-banner
 // =========================================================
 // END CALL
 // =========================================================
-function endCall(silent) {
+ function endCall(silent) {
   if (!currentCall) return;
+  if (IS_NATIVE) nativeCancelIncoming();
   if (mediaRecorder && mediaRecorder.state !== 'inactive') { try { mediaRecorder.stop(); } catch (e) {} }
   if (networkMonitor) { clearInterval(networkMonitor); networkMonitor = null; }
   if (uiIdleTimer) { clearTimeout(uiIdleTimer); uiIdleTimer = null; }
