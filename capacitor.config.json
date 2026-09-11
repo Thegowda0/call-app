@@ -3,7 +3,7 @@
   "appName": "Call System",
   "webDir": "www",
   "server": {
-    "androidScheme": "https",
-    "hostname": "call-system.mohan0.workers.dev"
+    "url": "https://call-system.mohan0.workers.dev",
+    "androidScheme": "https"
   }
 }
