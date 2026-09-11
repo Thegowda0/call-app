@@ -53,8 +53,8 @@ public class MainActivity extends BridgeActivity {
     private void startCallService() {
         try {
             Intent svc = new Intent(this, CallService.class);
-            svc.setAction(CallService.Companion.getACTION_START());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+svc.setAction(CallService.ACTION_START); 
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(svc);
             } else {
                 startService(svc);
